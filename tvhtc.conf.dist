@@ -1,0 +1,31 @@
+---
+
+from_addr: tvheadend@mydomain.com
+email_host: localhost
+pushover_app_token: J8932AHbnkih23sdfhab2asdfhbKIJ
+keep_originals: false
+beanstalk_server: 127.0.0.1:11300
+beanstalk_queue: transcoding
+
+transcode_settings:
+  audio: -c:a libmp3lame -q:a 3
+  video: -c:v libx264 -preset veryfast -crf 21 -c:a ac3 -b:a 192k -sn
+
+notify_list:
+    person1:
+        email: person1@gmail.com
+        pushover: ASdioj2390ahsdASUDHAiu3h2
+        notify_for:
+            - dragons.+den
+            - would.i.lie.to.you.?
+            - any.questions
+            - just.a.minute
+        is_default: true
+    person2:
+        email: person2@gmail.com
+        pushover: x2Asdghjvn0ahsdASUDHAiu3h2
+        notify_for:
+            - coronation.street
+            - eastenders
+            - hollyoaks
+
