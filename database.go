@@ -91,7 +91,7 @@ func (this *Database) Complete(t *TranscodeJob) error {
 		return fmt.Errorf("Error creating prepared statement: %v", err)
 	}
 
-	_, err = stmt.Exec(true, t.Message, t.ElapsedTime.Nanoseconds(), time.Now(), t.OldStats.Size(), t.NewStats.Size(), t.Job.DBID)
+	_, err = stmt.Exec(true, t.Message, t.ElapsedTime.Nanoseconds(), time.Now(), t.OldSize, t.NewSize, t.Job.DBID)
 	if err != nil {
 		return fmt.Errorf("Error completing job: %v", err)
 	}
@@ -102,7 +102,7 @@ func (this *Database) Complete(t *TranscodeJob) error {
 // Recover any uncompleted jobs from the database
 // and add them back onto the transcode queue
 func (this *Database) Recover() error {
-	Log.Debug("Doing database recovery...")
+	Log.Debug("Doing job recovery...")
 
 	rows, err := this.db.Query("SELECT id, path, filename, channel, title, status FROM transcodes WHERE completed=0")
 	if err != nil {

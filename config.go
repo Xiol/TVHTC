@@ -62,10 +62,10 @@ func (this *Config) Load(path string) error {
 func (this *Person) NotificationWanted(title string) bool {
 	for i := range this.InterestedIn {
 		if this.InterestedIn[i].Match([]byte(title)) {
-			Log.Debug("Person %v wants notification for %v", this.Email, title)
+			Log.Debug("Person %v wants notification for '%v'", this.Email, title)
 			return true
 		}
 	}
-	Log.Debug("Person %v does not want notification for %v", this.Email, title)
+	Log.Debug("Person %v does not want notification for '%v'", this.Email, title)
 	return false
 }

@@ -32,8 +32,8 @@ type TranscodeJob struct {
 	Message      string
 	Handlers     []Notifier
 	Conf         *Config
-	OldStats     os.FileInfo
-	NewStats     os.FileInfo
+	OldSize      int64
+	NewSize      int64
 	ElapsedTime  time.Duration
 }
 
@@ -186,12 +186,14 @@ func (this *TranscodeJob) Transcode() error {
 	}
 
 	var err error
-	if this.OldStats, err = os.Stat(this.Job.Path); err != nil {
+	var oldstats os.FileInfo
+	if oldstats, err = os.Stat(this.Job.Path); err != nil {
 		this.Message = "File no longer exists? Nothing done."
 		Log.Warning("File '%v' no longer exists? Aborting transcode.", this.Job.Path)
 		this.SendNotifications()
 		return fmt.Errorf(this.Message)
 	}
+	this.OldSize = oldstats.Size()
 
 	if err = this.GenerateTranscodeName(); err != nil {
 		this.Message = fmt.Sprintf("Error: %v", err.Error())
@@ -231,7 +233,8 @@ func (this *TranscodeJob) Transcode() error {
 		return err
 	}
 
-	this.NewStats, _ = os.Stat(this.TempPath)
+	newstats, _ := os.Stat(this.TempPath)
+	this.NewSize = newstats.Size()
 
 	var path string
 	if this.Type == MEDIA_AUDIO {
@@ -244,7 +247,7 @@ func (this *TranscodeJob) Transcode() error {
 	Log.Debug("Trim Path: %v", path)
 
 	this.Message = fmt.Sprintf("Transcode completed in %.2f minutes (size change: %vB -> %vB). Path: %v",
-		this.ElapsedTime.Minutes(), this.OldStats.Size(), this.NewStats.Size(), path)
+		this.ElapsedTime.Minutes(), this.OldSize, this.NewSize, path)
 	Log.Info(this.Message)
 	this.Success = true
 	err = this.DoRename()
