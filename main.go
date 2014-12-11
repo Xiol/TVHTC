@@ -47,15 +47,32 @@ func main() {
 		os.Exit(1)
 	}
 
+	db := NewDatabase()
+	db.Open()
+	defer db.Close()
+	db.Initialise()
+	Log.Info("Database connection successful.")
+	err := db.Recover()
+	if err != nil {
+		Log.Fatal("Failed to recover jobs from database: %v", err)
+	}
+
 	g := gin.Default()
 	if !debug {
 		gin.SetMode("release")
 	}
 	g.POST("/job", func(c *gin.Context) {
-		job := TVHJob{}
-		c.Bind(&job)
+		job := &TVHJob{}
+		c.Bind(job)
 		Log.Warning("Got new transcode job: %+v", job)
-		Transcode(&job)
+		var err error
+		job.DBID, err = db.AddEntry(job)
+		if err != nil {
+			Log.Error(err.Error())
+			c.JSON(500, gin.H{"status": "error", "message": err.Error()})
+			return
+		}
+		Transcode(job)
 		c.JSON(200, gin.H{"status": "ok"})
 		return
 	})
@@ -72,6 +89,6 @@ func main() {
 		return
 	})
 
-	StartQueueManager(&config)
+	StartQueueManager(&config, db)
 	g.Run(":8998")
 }

@@ -8,14 +8,12 @@ import (
 )
 
 type Config struct {
-	FromAddress     string             `yaml:"from_addr"`
-	EmailHost       string             `yaml:"email_host"`
-	PushoverToken   string             `yaml:"pushover_app_token"`
-	KeepOriginals   bool               `yaml:"keep_originals"`
-	BeanstalkServer string             `yaml:"beanstalk_server"`
-	BeanstalkQueue  string             `yaml:"beanstalk_queue"`
-	TCSettings      TranscodeSettings  `yaml:"transcode_settings"`
-	NotifyList      map[string]*Person `yaml:"notify_list"`
+	FromAddress   string             `yaml:"from_addr"`
+	EmailHost     string             `yaml:"email_host"`
+	PushoverToken string             `yaml:"pushover_app_token"`
+	KeepOriginals bool               `yaml:"keep_originals"`
+	TCSettings    TranscodeSettings  `yaml:"transcode_settings"`
+	NotifyList    map[string]*Person `yaml:"notify_list"`
 }
 
 type TranscodeSettings struct {

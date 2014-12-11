@@ -41,12 +41,12 @@ func (this PushoverNotifier) Send(job *TranscodeJob) error {
 		msg = job.Message
 	}
 
-	return this.push(msg, title)
+	return this.Push(msg, title)
 }
 
-func (this *PushoverNotifier) push(message, title string) error {
+func (this *PushoverNotifier) Push(message, title string) error {
 	if len(message) > 512 {
-		Log.Warning("Pushover message was too long, not sending. (%v > 512)", len(message))
+		Log.Error("Pushover message was too long, not sending. (%v > 512)", len(message))
 		return fmt.Errorf("Message too long.")
 	}
 

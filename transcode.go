@@ -32,6 +32,9 @@ type TranscodeJob struct {
 	Message      string
 	Handlers     []Notifier
 	Conf         *Config
+	OldStats     os.FileInfo
+	NewStats     os.FileInfo
+	ElapsedTime  time.Duration
 }
 
 func NewTranscodeJob(job *TVHJob, conf *Config) TranscodeJob {
@@ -182,9 +185,8 @@ func (this *TranscodeJob) Transcode() error {
 		return nil
 	}
 
-	var oldstats os.FileInfo
 	var err error
-	if oldstats, err = os.Stat(this.Job.Path); err != nil {
+	if this.OldStats, err = os.Stat(this.Job.Path); err != nil {
 		this.Message = "File no longer exists? Nothing done."
 		Log.Warning("File '%v' no longer exists? Aborting transcode.", this.Job.Path)
 		this.SendNotifications()
@@ -219,7 +221,7 @@ func (this *TranscodeJob) Transcode() error {
 
 	before := time.Now()
 	out, err := cmd.CombinedOutput()
-	tcduration := time.Since(before)
+	this.ElapsedTime = time.Since(before)
 	if err != nil {
 		// TODO: Write this out to a temporary file instead, likely
 		// to be too big to send via pushover
@@ -229,7 +231,7 @@ func (this *TranscodeJob) Transcode() error {
 		return err
 	}
 
-	newstats, _ := os.Stat(this.TempPath)
+	this.NewStats, _ = os.Stat(this.TempPath)
 
 	var path string
 	if this.Type == MEDIA_AUDIO {
@@ -241,7 +243,8 @@ func (this *TranscodeJob) Transcode() error {
 	path = strings.Replace(path, "/srv/storage/media/", "", -1)
 	Log.Debug("Trim Path: %v", path)
 
-	this.Message = fmt.Sprintf("Transcode completed in %.2f minutes (size change: %vB -> %vB). Path: %v", tcduration.Minutes(), oldstats.Size(), newstats.Size(), path)
+	this.Message = fmt.Sprintf("Transcode completed in %.2f minutes (size change: %vB -> %vB). Path: %v",
+		this.ElapsedTime.Minutes(), this.OldStats.Size(), this.NewStats.Size(), path)
 	Log.Info(this.Message)
 	this.Success = true
 	err = this.DoRename()

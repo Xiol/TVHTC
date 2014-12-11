@@ -6,4 +6,5 @@ type TVHJob struct {
 	Channel  string `json:"channel"`
 	Title    string `json:"title"`
 	Status   string `json:"status"`
+	DBID     int64  `json:"-"`
 }

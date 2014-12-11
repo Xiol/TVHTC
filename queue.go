@@ -8,7 +8,7 @@ func Transcode(job *TVHJob) {
 	return
 }
 
-func StartQueueManager(config *Config) {
+func StartQueueManager(config *Config, db *Database) {
 	Log.Warning("Queue manager starting up.")
 	go func() {
 		for {
@@ -17,6 +17,10 @@ func StartQueueManager(config *Config) {
 				// do transcode
 				tc := NewTranscodeJob(job, config)
 				tc.Transcode()
+				err := db.Complete(&tc)
+				if err != nil {
+					Log.Error(err.Error())
+				}
 				Log.Info("%v jobs remaining in queue.", QueueLength())
 			case <-shutdownManager:
 				Log.Warning("Queue manager shutting down.")
