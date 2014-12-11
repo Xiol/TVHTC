@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
+	"os/signal"
 	"runtime"
+	"syscall"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -88,6 +90,16 @@ func main() {
 		c.JSON(200, gin.H{"total_alloc": ms.TotalAlloc, "in_use": ms.Alloc})
 		return
 	})
+
+	signalChannel := make(chan os.Signal, 1)
+	signal.Notify(signalChannel, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-signalChannel
+		Log.Warning("Caught signal, shutting down. %v jobs left in queue.", QueueLength())
+		StopQueueManager()
+		db.Close()
+		os.Exit(0)
+	}()
 
 	StartQueueManager(&config, db)
 	g.Run(":8998")
