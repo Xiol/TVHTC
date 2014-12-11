@@ -14,6 +14,7 @@ type Config struct {
 	KeepOriginals bool               `yaml:"keep_originals"`
 	TCSettings    TranscodeSettings  `yaml:"transcode_settings"`
 	NotifyList    map[string]*Person `yaml:"notify_list"`
+	TrimPath      string             `yaml:"trim_path"`
 }
 
 type TranscodeSettings struct {

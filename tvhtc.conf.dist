@@ -4,6 +4,7 @@ from_addr: tvheadend@mydomain.com
 email_host: localhost
 pushover_app_token: J8932AHbnkih23sdfhab2asdfhbKIJ
 keep_originals: false
+trim_path: /srv/storage/media/
 
 transcode_settings:
   audio: -c:a libmp3lame -q:a 3

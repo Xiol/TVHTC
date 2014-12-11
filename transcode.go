@@ -240,7 +240,7 @@ func (this *TranscodeJob) Transcode() error {
 		path = this.Job.Path
 	}
 	Log.Debug("Path: %v", path)
-	path = strings.Replace(path, "/srv/storage/media/", "", -1)
+	path = strings.Replace(path, this.Conf.TrimPath, "", -1)
 	Log.Debug("Trim Path: %v", path)
 
 	this.Message = fmt.Sprintf("Transcode completed in %.2f minutes (size change: %vB -> %vB). Path: %v",
