@@ -51,7 +51,7 @@ func (this *TranscodeJob) SetupNotifications() {
 		}
 		if v.NotificationWanted(this.Job.Title) {
 			if v.Pushover != "" {
-				Log.Debug("Adding Pushover notification for %v", v.Pushover)
+				Log.Debug("Adding Pushover notification for '%v'", v.Pushover)
 				po := NewPushoverNotifier(this.Conf.PushoverToken, v.Pushover, 0)
 				this.Handlers = append(this.Handlers, po)
 			}
@@ -62,7 +62,7 @@ func (this *TranscodeJob) SetupNotifications() {
 	}
 	if len(this.Handlers) == 0 && def != nil {
 		if def.Pushover != "" {
-			Log.Debug("Adding default Pushover notification for %v", def.Pushover)
+			Log.Debug("Adding default Pushover notification for '%v'", def.Pushover)
 			this.Handlers = append(this.Handlers, NewPushoverNotifier(this.Conf.PushoverToken, def.Pushover, 0))
 		}
 	}
@@ -70,7 +70,7 @@ func (this *TranscodeJob) SetupNotifications() {
 
 // Runs the Send() function on all the notifications configured for this job.
 func (this *TranscodeJob) SendNotifications() error {
-	Log.Info("Sending notifications for transcode job %v", this.Job.Title)
+	Log.Info("Sending notifications for transcode job '%v'", this.Job.Title)
 	errors := make([]string, 0)
 
 	for i := range this.Handlers {
