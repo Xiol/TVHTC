@@ -14,7 +14,7 @@ func StartQueueManager(config *Config, db *Database) {
 		for {
 			select {
 			case job := <-tcQueue:
-				// do transcode
+				Log.Info("Processing transcode job: %+v", job)
 				tc := NewTranscodeJob(job, config)
 				tc.Transcode()
 				err := db.Complete(&tc)

@@ -66,7 +66,7 @@ func main() {
 	g.POST("/job", func(c *gin.Context) {
 		job := &TVHJob{}
 		c.Bind(job)
-		Log.Warning("Got new transcode job: %+v", job)
+		Log.Info("Received new transcode job: %v", job)
 		var err error
 		job.DBID, err = db.AddEntry(job)
 		if err != nil {
