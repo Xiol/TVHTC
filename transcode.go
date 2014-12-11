@@ -45,14 +45,16 @@ func NewTranscodeJob(job *TVHJob, conf *Config) TranscodeJob {
 // This doesn't feel right, so probably needs rewriting.
 func (this *TranscodeJob) SetupNotifications() {
 	var def *Person
-	for _, v := range this.Conf.NotifyList {
+	var defname string
+	for k, v := range this.Conf.NotifyList {
 		if v.IsDefault {
 			def = v
+			defname = k
 		}
 		if v.NotificationWanted(this.Job.Title) {
 			if v.Pushover != "" {
 				Log.Debug("Adding Pushover notification for '%v'", v.Pushover)
-				po := NewPushoverNotifier(this.Conf.PushoverToken, v.Pushover, 0)
+				po := NewPushoverNotifier(k, this.Conf.PushoverToken, v.Pushover, 0)
 				this.Handlers = append(this.Handlers, po)
 			}
 			if v.Email != "" {
@@ -63,7 +65,7 @@ func (this *TranscodeJob) SetupNotifications() {
 	if len(this.Handlers) == 0 && def != nil {
 		if def.Pushover != "" {
 			Log.Debug("Adding default Pushover notification for '%v'", def.Pushover)
-			this.Handlers = append(this.Handlers, NewPushoverNotifier(this.Conf.PushoverToken, def.Pushover, 0))
+			this.Handlers = append(this.Handlers, NewPushoverNotifier(defname, this.Conf.PushoverToken, def.Pushover, 0))
 		}
 	}
 }

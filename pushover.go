@@ -18,13 +18,15 @@ type PushoverResponse struct {
 }
 
 type PushoverNotifier struct {
+	Name     string
 	APIToken string
 	User     string
 	Priority int
 }
 
-func NewPushoverNotifier(token, user string, priority int) PushoverNotifier {
+func NewPushoverNotifier(name, token, user string, priority int) PushoverNotifier {
 	return PushoverNotifier{
+		Name:     name,
 		APIToken: token,
 		User:     user,
 		Priority: priority,
@@ -40,6 +42,8 @@ func (this PushoverNotifier) Send(job *TranscodeJob) error {
 	} else {
 		msg = job.Message
 	}
+
+	Log.Info("Sending Pushover notification for '%v' to '%v'", job.Job.Title, this.Name)
 
 	return this.Push(msg, title)
 }
