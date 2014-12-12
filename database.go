@@ -130,3 +130,28 @@ func (this *Database) Recover() error {
 
 	return nil
 }
+
+func (this *Database) IncompleteJobs() ([]TVHJob, error) {
+	Log.Debug("Getting incomplete job list...")
+	jobs := make([]TVHJob, 0)
+
+	rows, err := this.db.Query("SELECT id, path, filename, channel, title, status FROM transcodes WHERE completed=0")
+	if err != nil {
+		return nil, fmt.Errorf("Error querying database: %v", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		job := TVHJob{}
+		err := rows.Scan(&job.DBID, &job.Path, &job.Filename, &job.Channel, &job.Title, &job.Status)
+		if err != nil {
+			return nil, fmt.Errorf("Error retrieving row from database: %v", err)
+		}
+		jobs = append(jobs, job)
+	}
+	err = rows.Err()
+	if err != nil {
+		return nil, fmt.Errorf("Error retriving incomplete jobs: %v", err)
+	}
+	return jobs, nil
+}

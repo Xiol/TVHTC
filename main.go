@@ -79,8 +79,15 @@ func main() {
 		return
 	})
 
-	g.GET("/job", func(c *gin.Context) {
-		//get list of all jobs etc
+	g.GET("/incompletejobs", func(c *gin.Context) {
+		jobs, err := db.IncompleteJobs()
+		if err != nil {
+			Log.Error(err.Error())
+			c.JSON(500, gin.H{"message": err.Error()})
+			return
+		}
+		c.JSON(200, gin.H{"jobs": jobs})
+		return
 	})
 
 	g.GET("/memstats", func(c *gin.Context) {
@@ -102,5 +109,5 @@ func main() {
 	}()
 
 	StartQueueManager(&config, db)
-	g.Run(":8998")
+	g.Run(":8988")
 }
