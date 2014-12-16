@@ -37,18 +37,23 @@ func (this PushoverNotifier) Send(job *TranscodeJob) error {
 	title := job.Job.Title
 	var msg string
 	if len(job.Message) > 512 {
-		msg = job.Message[0:508]
-		msg = fmt.Sprintf("%v...", msg)
+		if !job.Success {
+			// Just keep last 256 chars, should hopefully contain
+			// the relevent data (error message for example!)
+			msg = fmt.Sprintf("Error: ... %v", job.Message[len(job.Message)-256:])
+		} else {
+			msg = job.Message[:256]
+		}
 	} else {
 		msg = job.Message
 	}
 
 	Log.Info("Sending Pushover notification for '%v' to '%v'", job.Job.Title, this.Name)
 
-	return this.Push(msg, title)
+	return this.Push(msg, title, job.Success)
 }
 
-func (this *PushoverNotifier) Push(message, title string) error {
+func (this *PushoverNotifier) Push(message, title string, success bool) error {
 	if len(message) > 512 {
 		Log.Error("Pushover message was too long, not sending. (%v > 512)", len(message))
 		return fmt.Errorf("Message too long.")
@@ -60,7 +65,11 @@ func (this *PushoverNotifier) Push(message, title string) error {
 	payload.Add("user", this.User)
 	payload.Add("priority", strconv.Itoa(this.Priority))
 	payload.Add("timestamp", strconv.Itoa(int(time.Now().Unix())))
-	payload.Add("title", fmt.Sprintf("New Recording: %v", title))
+	if success {
+		payload.Add("title", fmt.Sprintf("New Recording: %v", title))
+	} else {
+		payload.Add("title", fmt.Sprintf("Failed Recording: %v", title))
+	}
 	payload.Add("message", message)
 
 	resp, err := http.PostForm(pushoverMessageAPI, payload)
