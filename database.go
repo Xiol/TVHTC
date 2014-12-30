@@ -151,7 +151,7 @@ func (this *Database) IncompleteJobs() ([]TVHJob, error) {
 	}
 	err = rows.Err()
 	if err != nil {
-		return nil, fmt.Errorf("Error retriving incomplete jobs: %v", err)
+		return nil, fmt.Errorf("Error retrieving incomplete jobs: %v", err)
 	}
 	return jobs, nil
 }
