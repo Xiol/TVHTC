@@ -237,15 +237,15 @@ func (this *TranscodeJob) Transcode() error {
 		return err
 	}
 
-	newstats, _ := os.Stat(this.TempPath)
-	this.NewSize = newstats.Size()
-
-	var path string
-	if this.Type == MEDIA_AUDIO {
-		path = this.Job.Path
+	newstats, err := os.Stat(this.TempPath)
+	if err != nil {
+		Log.Error("Error retrieving stats for transcoded file '%v': %v", this.TempPath, err)
+		this.NewSize = 0
 	} else {
-		path = this.Job.Path
+		this.NewSize = newstats.Size()
 	}
+
+	path := this.Job.Path
 	Log.Debug("Path: %v", path)
 	path = strings.Replace(path, this.Conf.TrimPath, "", -1)
 	Log.Debug("Trim Path: %v", path)
