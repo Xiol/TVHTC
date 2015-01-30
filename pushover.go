@@ -34,7 +34,6 @@ func NewPushoverNotifier(name, token, user string, priority int) PushoverNotifie
 }
 
 func (this PushoverNotifier) Send(job *TranscodeJob) error {
-	title := job.Job.Title
 	var msg string
 	if len(job.Message) > 512 {
 		if !job.Success {
@@ -50,10 +49,10 @@ func (this PushoverNotifier) Send(job *TranscodeJob) error {
 
 	Log.Info("Sending Pushover notification for '%v' to '%v'", job.Job.Title, this.Name)
 
-	return this.Push(msg, title, job.Success)
+	return this.Push(msg, job.Job.Title, job.Job.Channel, job.Success)
 }
 
-func (this *PushoverNotifier) Push(message, title string, success bool) error {
+func (this *PushoverNotifier) Push(message, title, channel string, success bool) error {
 	if len(message) > 512 {
 		Log.Error("Pushover message was too long, not sending. (%v > 512)", len(message))
 		return fmt.Errorf("Message too long.")
@@ -66,9 +65,9 @@ func (this *PushoverNotifier) Push(message, title string, success bool) error {
 	payload.Add("priority", strconv.Itoa(this.Priority))
 	payload.Add("timestamp", strconv.Itoa(int(time.Now().Unix())))
 	if success {
-		payload.Add("title", fmt.Sprintf("New Recording: %v", title))
+		payload.Add("title", fmt.Sprintf("New Recording: %v (%v)", title, channel))
 	} else {
-		payload.Add("title", fmt.Sprintf("Failed Recording: %v", title))
+		payload.Add("title", fmt.Sprintf("Failed Recording: %v (%v)", title, channel))
 	}
 	payload.Add("message", message)
 
