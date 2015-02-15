@@ -5,6 +5,8 @@ email_host: localhost
 pushover_app_token: J8932AHbnkih23sdfhab2asdfhbKIJ
 keep_originals: false
 trim_path: /srv/storage/media/
+db_directory: /var/lib/tvhtc/
+bind: 0.0.0.0:8997
 
 transcode_settings:
   audio: -c:a libmp3lame -q:a 3

@@ -17,6 +17,7 @@ type Config struct {
 	NotifyList       map[string]*Person `yaml:"notify_list"`
 	TrimPath         string             `yaml:"trim_path"`
 	DatabaseLocation string             `yaml:"db_directory"`
+	NetworkBind      string             `yaml:"bind"`
 }
 
 type TranscodeSettings struct {

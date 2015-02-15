@@ -109,5 +109,5 @@ func main() {
 	}()
 
 	StartQueueManager(&config, db)
-	g.Run(":8998")
+	g.Run(config.NetworkBind)
 }
