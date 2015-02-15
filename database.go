@@ -7,21 +7,20 @@ import (
 	"time"
 )
 
-const dbpath string = "./tvhtc.db"
-
 type Database struct {
-	db *sql.DB
+	db   *sql.DB
+	path string
 }
 
-func NewDatabase() *Database {
-	return &Database{}
+func NewDatabase(path string) *Database {
+	return &Database{path: path}
 }
 
 // Connect to the database and actually Ping() it to ensure our
 // connection is good.
 func (this *Database) Open() {
 	var err error
-	this.db, err = sql.Open("sqlite3", dbpath)
+	this.db, err = sql.Open("sqlite3", this.path)
 	if err != nil {
 		Log.Fatalf("Error opening database: %v", err)
 	}

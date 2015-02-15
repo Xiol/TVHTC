@@ -49,7 +49,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	db := NewDatabase()
+	db := NewDatabase(config.DatabaseLocation)
 	db.Open()
 	defer db.Close()
 	db.Initialise()

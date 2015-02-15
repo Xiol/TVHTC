@@ -4,17 +4,19 @@ import (
 	"fmt"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
+	"path/filepath"
 	"regexp"
 )
 
 type Config struct {
-	FromAddress   string             `yaml:"from_addr"`
-	EmailHost     string             `yaml:"email_host"`
-	PushoverToken string             `yaml:"pushover_app_token"`
-	KeepOriginals bool               `yaml:"keep_originals"`
-	TCSettings    TranscodeSettings  `yaml:"transcode_settings"`
-	NotifyList    map[string]*Person `yaml:"notify_list"`
-	TrimPath      string             `yaml:"trim_path"`
+	FromAddress      string             `yaml:"from_addr"`
+	EmailHost        string             `yaml:"email_host"`
+	PushoverToken    string             `yaml:"pushover_app_token"`
+	KeepOriginals    bool               `yaml:"keep_originals"`
+	TCSettings       TranscodeSettings  `yaml:"transcode_settings"`
+	NotifyList       map[string]*Person `yaml:"notify_list"`
+	TrimPath         string             `yaml:"trim_path"`
+	DatabaseLocation string             `yaml:"db_directory"`
 }
 
 type TranscodeSettings struct {
@@ -55,6 +57,8 @@ func (this *Config) Load(path string) error {
 			this.NotifyList[name].InterestedIn[i] = r
 		}
 	}
+
+	this.DatabaseLocation = filepath.Join(this.DatabaseLocation, "tvhtc.db")
 
 	return nil
 }
