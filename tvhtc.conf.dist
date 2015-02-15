@@ -1,17 +1,49 @@
 ---
+# TVHTC Configuration File
+# Must be valid YAML!
 
+# Address that emails from TVHTC appear to originate from
 from_addr: tvheadend@mydomain.com
+
+# SMTP host for sending emails. Auth is not supported.
 email_host: localhost
+
+# Pushover application token
 pushover_app_token: J8932AHbnkih23sdfhab2asdfhbKIJ
+
+# Do we keep the original files from TVHeadend?
 keep_originals: false
+
+# When sending notifications, we'll strip this part of the path
+# from the message - this is an aesthetic thing only.
 trim_path: /srv/storage/media/
+
+# Location of the database directory. This must be read/writeable by the
+# user which TVHTC runs under.
 db_directory: /var/lib/tvhtc/
+
+# Network address and port to bind to.
 bind: 0.0.0.0:8997
 
+# ffmpeg command line settings for audio and video transcoding.
+# These flags are sent through as-is, so there's a potential security
+# issue here - take appropriate precautions.
 transcode_settings:
   audio: -c:a libmp3lame -q:a 3
   video: -c:v libx264 -preset veryfast -crf 21 -c:a ac3 -b:a 192k -sn
 
+# Notification list for TV shows. At least one person must have
+# the is_default field set to true - this person will receive
+# all notifications that don't have a specified person.
+# If someone has a programme they want to be notified for, no one
+# else will receive notifications. This means if you're configuring
+# a notification that should go to more than one person, you'll have
+# to add it to all the people interested.
+# Notifications will be sent to all configured notification types,
+# so if you only want Pushover notifications, only configure a pushover
+# key. Same goes for email.
+# The programme names are matched by case-insensitive regular expressions
+# against the 'title' sent from TVHeadend.
 notify_list:
     person1:
         pushover: ASdioj2390ahsdASUDHAiu3h2
