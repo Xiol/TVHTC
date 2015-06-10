@@ -1,0 +1,15 @@
+[Install]
+WantedBy=multi-user.target
+
+[Unit]
+Description=TVHeadend Transcoding and Notification service
+
+[Service]
+ExecStart=/usr/local/bin/tvhtc
+ExecReload=/bin/kill -USR1 $MAINPID
+WorkingDirectory=/var/lib/tvhtc
+User=hts
+Group=video
+TimeoutStopSec=2
+Restart=always
+KillMode=control-group
