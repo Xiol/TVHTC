@@ -59,10 +59,11 @@ func main() {
 		Log.Fatal("Failed to recover jobs from database: %v", err)
 	}
 
-	g := gin.Default()
 	if !debug {
-		gin.SetMode("release")
+		gin.SetMode(gin.ReleaseMode)
 	}
+	g := gin.Default()
+
 	g.POST("/job", func(c *gin.Context) {
 		job := &TVHJob{}
 		c.Bind(job)
@@ -99,13 +100,40 @@ func main() {
 	})
 
 	signalChannel := make(chan os.Signal, 1)
-	signal.Notify(signalChannel, os.Interrupt, syscall.SIGTERM)
+	signal.Notify(signalChannel, os.Interrupt, syscall.SIGTERM, syscall.SIGUSR1)
 	go func() {
-		<-signalChannel
-		Log.Warning("Caught signal, shutting down. %v jobs left in queue.", QueueLength())
-		StopQueueManager()
-		db.Close()
-		os.Exit(0)
+		for {
+			sig := <-signalChannel
+			switch sig {
+			case os.Interrupt, syscall.SIGTERM:
+				Log.Warning("Caught signal, shutting down. %v jobs left in queue.", QueueLength())
+				StopQueueManager()
+				db.Close()
+				os.Exit(0)
+			case syscall.SIGUSR1:
+				// Could probably make this neater, but dat technical debt tho
+				ppn := make(map[string]int)
+				for p, v := range config.NotifyList {
+					ppn[p] = len(v.InterestedIn)
+				}
+
+				Log.Warning("Reloading configuration...")
+				config.Load(configPath)
+
+				npn := make(map[string]int)
+				for p, v := range config.NotifyList {
+					npn[p] = len(v.InterestedIn)
+				}
+				Log.Info("Configuration reloaded. Notifications changed:")
+				for k, v := range npn {
+					if _, ok := ppn[k]; !ok {
+						Log.Info("New user: %s -> %d notifications", k, v)
+					} else {
+						Log.Info("User %s: %d -> %d", k, ppn[k], npn[k])
+					}
+				}
+			}
+		}
 	}()
 
 	StartQueueManager(&config, db)

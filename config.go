@@ -5,9 +5,11 @@ import (
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"regexp"
+	"sync"
 )
 
 type Config struct {
+	sync.RWMutex
 	FromAddress   string             `yaml:"from_addr"`
 	EmailHost     string             `yaml:"email_host"`
 	PushoverToken string             `yaml:"pushover_app_token"`
@@ -23,6 +25,7 @@ type TranscodeSettings struct {
 }
 
 type Person struct {
+	sync.RWMutex
 	Email        string           `yaml:"email"`
 	Pushover     string           `yaml:"pushover"`
 	NotifyFor    []string         `yaml:"notify_for"`
@@ -35,6 +38,9 @@ func NewConfig() Config {
 }
 
 func (this *Config) Load(path string) error {
+	this.Lock()
+	defer this.Unlock()
+
 	raw, err := ioutil.ReadFile(path)
 	if err != nil {
 		return err
@@ -46,6 +52,9 @@ func (this *Config) Load(path string) error {
 	}
 
 	for name, _ := range this.NotifyList {
+		this.NotifyList[name].Lock()
+		defer this.NotifyList[name].Unlock()
+
 		this.NotifyList[name].InterestedIn = make([]*regexp.Regexp, len(this.NotifyList[name].NotifyFor))
 		for i := range this.NotifyList[name].NotifyFor {
 			r, err := regexp.Compile(fmt.Sprintf("(?i)%v", this.NotifyList[name].NotifyFor[i]))
@@ -60,6 +69,9 @@ func (this *Config) Load(path string) error {
 }
 
 func (this *Person) NotificationWanted(title string) bool {
+	this.RLock()
+	defer this.RUnlock()
+
 	for i := range this.InterestedIn {
 		if this.InterestedIn[i].Match([]byte(title)) {
 			Log.Debug("Person %v wants notification for '%v'", this.Email, title)
