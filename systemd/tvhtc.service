@@ -3,6 +3,7 @@ WantedBy=multi-user.target
 
 [Unit]
 Description=TVHeadend Transcoding and Notification service
+Documentation=http://github.com/Xiol/TVHTC file:/etc/tvhtc.conf
 
 [Service]
 ExecStart=/usr/local/bin/tvhtc
