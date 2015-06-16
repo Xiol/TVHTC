@@ -23,6 +23,8 @@ func main() {
 	flag.StringVar(&configPath, "c", "/etc/tvhtc.conf", "Path to configuration file")
 	var debug bool
 	flag.BoolVar(&debug, "d", false, "Enable debugging output to stdout")
+	var port int
+	flag.IntVar(&port, "p", 8998, "Port to listen on")
 	flag.Parse()
 
 	if !debug {
@@ -91,6 +93,17 @@ func main() {
 		return
 	})
 
+	g.GET("/recentcompleted", func(c *gin.Context) {
+		jobs, err := db.GetRecentCompleted()
+		if err != nil {
+			Log.Error(err.Error())
+			c.JSON(500, gin.H{"message": err.Error()})
+			return
+		}
+		c.JSON(200, gin.H{"jobs": jobs})
+		return
+	})
+
 	g.GET("/memstats", func(c *gin.Context) {
 		// memory stats
 		ms := runtime.MemStats{}
@@ -137,5 +150,5 @@ func main() {
 	}()
 
 	StartQueueManager(&config, db)
-	g.Run(":8998")
+	g.Run(fmt.Sprintf(":%d", port))
 }

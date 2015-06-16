@@ -155,3 +155,30 @@ func (this *Database) IncompleteJobs() ([]TVHJob, error) {
 	}
 	return jobs, nil
 }
+
+func (this *Database) GetRecentCompleted() ([]TVHJob, error) {
+	Log.Debug("Getting recently completed jobs...")
+	jobs := make([]TVHJob, 0)
+
+	rows, err := this.db.Query(`SELECT id, path, filename, channel, title, status 
+								FROM transcodes WHERE completed=1 and status='OK' 
+								ORDER BY completetime DESC LIMIT 30`)
+	if err != nil {
+		return nil, fmt.Errorf("Error querying database: %v", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		job := TVHJob{}
+		err := rows.Scan(&job.DBID, &job.Path, &job.Filename, &job.Channel, &job.Title, &job.Status)
+		if err != nil {
+			return nil, fmt.Errorf("Error retrieving row from database: %v", err)
+		}
+		jobs = append(jobs, job)
+	}
+	err = rows.Err()
+	if err != nil {
+		return nil, fmt.Errorf("Error retrieving completed jobs: %v", err)
+	}
+	return jobs, nil
+}
