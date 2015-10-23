@@ -26,6 +26,7 @@ type TranscodeSettings struct {
 
 type Person struct {
 	sync.RWMutex
+	Name         string           `yaml:"-"`
 	Email        string           `yaml:"email"`
 	Pushover     string           `yaml:"pushover"`
 	NotifyFor    []string         `yaml:"notify_for"`
@@ -55,6 +56,10 @@ func (this *Config) Load(path string) error {
 		this.NotifyList[name].Lock()
 		defer this.NotifyList[name].Unlock()
 
+		for name := range this.NotifyList {
+			this.NotifyList[name].Name = name
+		}
+
 		this.NotifyList[name].InterestedIn = make([]*regexp.Regexp, len(this.NotifyList[name].NotifyFor))
 		for i := range this.NotifyList[name].NotifyFor {
 			r, err := regexp.Compile(fmt.Sprintf("(?i)%v", this.NotifyList[name].NotifyFor[i]))
@@ -74,10 +79,10 @@ func (this *Person) NotificationWanted(title string) bool {
 
 	for i := range this.InterestedIn {
 		if this.InterestedIn[i].Match([]byte(title)) {
-			Log.Debug("Person %v wants notification for '%v'", this.Email, title)
+			Log.Debug("Person %v wants notification for '%v'", this.Name, title)
 			return true
 		}
 	}
-	Log.Debug("Person %v does not want notification for '%v'", this.Email, title)
+	Log.Debug("Person %v does not want notification for '%v'", this.Name, title)
 	return false
 }
