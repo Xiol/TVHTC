@@ -250,8 +250,13 @@ func (this *TranscodeJob) Transcode() error {
 	path = strings.Replace(path, this.Conf.TrimPath, "", -1)
 	Log.Debug("Trim Path: %v", path)
 
-	this.Message = fmt.Sprintf("Transcode completed in %.2f minutes (size change: %v -> %v). Path: %v",
-		this.ElapsedTime.Minutes(), humanize.IBytes(uint64(this.OldSize)), humanize.IBytes(uint64(this.NewSize)), path)
+	this.Message = fmt.Sprintf("%v\n\nTranscode completed in %.2f minutes (size change: %v -> %v). Path: %v",
+		this.Job.Description,
+		this.ElapsedTime.Minutes(),
+		humanize.IBytes(uint64(this.OldSize)),
+		humanize.IBytes(uint64(this.NewSize)),
+		path)
+
 	Log.Info(this.Message)
 	this.Success = true
 	err = this.DoRename()

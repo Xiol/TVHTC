@@ -44,7 +44,7 @@ func (this *Database) Initialise() {
 	create_stmt := `CREATE TABLE IF NOT EXISTS transcodes (
 					id INTEGER NOT NULL PRIMARY KEY, path TEXT, 
 					filename TEXT, channel TEXT, title TEXT, 
-					status TEXT, completed INTEGER, message TEXT,
+					status TEXT, description TEXT, completed INTEGER, message TEXT,
 					elapsedtime INTEGER, initialqueuetime DATETIME, 
 					completetime DATETIME, sizebefore INTEGER, sizeafter INTEGER);`
 
@@ -61,15 +61,15 @@ func (this *Database) Initialise() {
 // Add a new job to the database.
 func (this *Database) AddEntry(t *TVHJob) (int64, error) {
 	Log.Debug("Adding database entry for job: %+v", t)
-	stmt, err := this.db.Prepare(`INSERT INTO transcodes (path, filename, channel, title, status, 
+	stmt, err := this.db.Prepare(`INSERT INTO transcodes (path, filename, channel, title, status, description, 
 								  completed, message, elapsedtime, initialqueuetime, completetime, 
-								  sizebefore, sizeafter) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`)
+								  sizebefore, sizeafter) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`)
 	if err != nil {
 		return -1, fmt.Errorf("Error creating prepared statement: %v", err)
 	}
 	defer stmt.Close()
 
-	res, err := stmt.Exec(t.Path, t.Filename, t.Channel, t.Title, t.Status, false, "", 0, time.Now(), nil, 0, 0)
+	res, err := stmt.Exec(t.Path, t.Filename, t.Channel, t.Title, t.Status, t.Description, false, "", 0, time.Now(), nil, 0, 0)
 	if err != nil {
 		return -1, fmt.Errorf("Could not add job to database: %v", err)
 	}
@@ -104,7 +104,7 @@ func (this *Database) Complete(t *TranscodeJob) error {
 func (this *Database) Recover() error {
 	Log.Debug("Doing job recovery...")
 
-	rows, err := this.db.Query("SELECT id, path, filename, channel, title, status FROM transcodes WHERE completed=0")
+	rows, err := this.db.Query("SELECT id, path, filename, channel, title, status, description FROM transcodes WHERE completed=0")
 	if err != nil {
 		return fmt.Errorf("Error querying database: %v", err)
 	}
@@ -114,7 +114,7 @@ func (this *Database) Recover() error {
 	for rows.Next() {
 		job := &TVHJob{}
 		//err := rows.Scan(&path, &filename, &channel, &title, &status)
-		err := rows.Scan(&job.DBID, &job.Path, &job.Filename, &job.Channel, &job.Title, &job.Status)
+		err := rows.Scan(&job.DBID, &job.Path, &job.Filename, &job.Channel, &job.Title, &job.Status, &job.Description)
 		if err != nil {
 			return fmt.Errorf("Error retrieving row from database: %v", err)
 		}
@@ -135,7 +135,7 @@ func (this *Database) IncompleteJobs() ([]TVHJob, error) {
 	Log.Debug("Getting incomplete job list...")
 	jobs := make([]TVHJob, 0)
 
-	rows, err := this.db.Query("SELECT id, path, filename, channel, title, status FROM transcodes WHERE completed=0")
+	rows, err := this.db.Query("SELECT id, path, filename, channel, title, status, description FROM transcodes WHERE completed=0")
 	if err != nil {
 		return nil, fmt.Errorf("Error querying database: %v", err)
 	}
@@ -143,7 +143,7 @@ func (this *Database) IncompleteJobs() ([]TVHJob, error) {
 
 	for rows.Next() {
 		job := TVHJob{}
-		err := rows.Scan(&job.DBID, &job.Path, &job.Filename, &job.Channel, &job.Title, &job.Status)
+		err := rows.Scan(&job.DBID, &job.Path, &job.Filename, &job.Channel, &job.Title, &job.Status, &job.Description)
 		if err != nil {
 			return nil, fmt.Errorf("Error retrieving row from database: %v", err)
 		}
@@ -160,7 +160,7 @@ func (this *Database) GetRecentCompleted() ([]TVHJob, error) {
 	Log.Debug("Getting recently completed jobs...")
 	jobs := make([]TVHJob, 0)
 
-	rows, err := this.db.Query(`SELECT id, path, filename, channel, title, status 
+	rows, err := this.db.Query(`SELECT id, path, filename, channel, title, status, description 
 								FROM transcodes WHERE completed=1 and status='OK' 
 								ORDER BY completetime DESC LIMIT 30`)
 	if err != nil {
@@ -170,7 +170,7 @@ func (this *Database) GetRecentCompleted() ([]TVHJob, error) {
 
 	for rows.Next() {
 		job := TVHJob{}
-		err := rows.Scan(&job.DBID, &job.Path, &job.Filename, &job.Channel, &job.Title, &job.Status)
+		err := rows.Scan(&job.DBID, &job.Path, &job.Filename, &job.Channel, &job.Title, &job.Status, &job.Description)
 		if err != nil {
 			return nil, fmt.Errorf("Error retrieving row from database: %v", err)
 		}
