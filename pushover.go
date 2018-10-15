@@ -54,8 +54,7 @@ func (this PushoverNotifier) Send(job *TranscodeJob) error {
 
 func (this *PushoverNotifier) Push(message, title, channel string, success bool) error {
 	if len(message) > 512 {
-		Log.Error("Pushover message was too long, not sending. (%v > 512)", len(message))
-		return fmt.Errorf("Message too long.")
+		message = message[:512]
 	}
 
 	payload := url.Values{}
